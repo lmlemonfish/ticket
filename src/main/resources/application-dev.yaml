@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/ticket?serverTimezone=Asia/Shanghai&allowMultiQueries=true&useUnicode=true&characterEncoding=UTF-8&useSSL=false
+    username: root
+    password: root
+  mail:
+    host: smtp.163.com
+    username: ticket_2214@163.com
+    password: 123456a
+    protocol: smtp
+    default-encoding: UTF-8
+
+config-time:
+  randomTime: 20000
