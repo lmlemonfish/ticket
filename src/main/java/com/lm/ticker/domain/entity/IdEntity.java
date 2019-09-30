@@ -2,6 +2,7 @@ package com.lm.ticker.domain.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import lombok.Data;
 
 /**
@@ -15,5 +16,8 @@ public class IdEntity {
 
     @TableId(type = IdType.AUTO)
     protected Long id;
+
+    @TableLogic
+    protected Integer deleted;
 
 }

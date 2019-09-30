@@ -49,7 +49,7 @@ public class NotifyScheduler {
     @Resource
     private LoopTimeConfig loopTimeConfig;
 
-    @Scheduled(fixedRate = 50 * 1000)
+    @Scheduled(fixedRate = 20 * 1000)
     public void doLister() {
 
         try {
