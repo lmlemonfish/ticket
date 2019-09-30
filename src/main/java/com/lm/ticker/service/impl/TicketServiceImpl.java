@@ -43,6 +43,7 @@ public class TicketServiceImpl implements TicketService {
 
         ResponseEntity<String> result = request(uri, HttpMethod.GET, httpEntity, String.class);
         String body = result.getBody();
+
         return JsonUtils.toPojo(body, TradeDto.class);
     }
 
@@ -76,7 +77,6 @@ public class TicketServiceImpl implements TicketService {
      * @param <T>
      * @return
      */
-    @Retryable(value = Exception.class, maxAttempts = 3, backoff = @Backoff(delay = 5000L, multiplier = 1.5))
     private <T> ResponseEntity<T> request(URI url, HttpMethod method, @Nullable HttpEntity<?> requestEntity, Class<T> classType) {
         ResponseEntity<T> result = null;
         try {

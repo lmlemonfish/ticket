@@ -1,8 +1,10 @@
 package com.lm.ticker.service.impl;
 
+import com.lm.ticker.constants.MailConstant;
 import com.lm.ticker.domain.entity.CustomerCommodityEntity;
 import com.lm.ticker.service.MailService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -26,7 +28,11 @@ public class MailServiceImpl implements MailService {
 
     private final String subject = "【通知信息】";
 
-    private final String from = "ticket_2214@163.com";
+    private String from;
+
+    public MailServiceImpl(@Value("${spring.mail.username}") String from) {
+        this.from = from;
+    }
 
     @Override
     public void sendSimpleMail(String to, String content) {
@@ -68,7 +74,7 @@ public class MailServiceImpl implements MailService {
         } catch (Exception e) {
             e.printStackTrace();
             log.error("群发送邮件失败, 邮箱:{}, e:{}", batchRe, e);
-            sendSimpleMail(from, "您好，群发邮件失败");
+            sendSimpleMail(MailConstant.myNoticeEmail, "您好，群发邮件失败");
         }
 
     }

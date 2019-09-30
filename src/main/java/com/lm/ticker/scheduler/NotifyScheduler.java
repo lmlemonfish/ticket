@@ -7,6 +7,7 @@ import com.lm.ticker.domain.dto.TradeDto;
 import com.lm.ticker.domain.entity.CustomerCommodityEntity;
 import com.lm.ticker.enums.ShelfEnum;
 import com.lm.ticker.service.MailService;
+import com.lm.ticker.service.TicketServicePlus;
 import com.lm.ticker.service.bean.CustomerCommodityService;
 import com.lm.ticker.service.impl.TicketServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +38,7 @@ import java.util.stream.Collectors;
 public class NotifyScheduler {
 
     @Resource
-    private TicketServiceImpl ticketServiceImpl;
+    private TicketServicePlus ticketServicePlus;
 
     @Resource
     private MailService mailService;
@@ -63,7 +64,7 @@ public class NotifyScheduler {
         Set<Map.Entry<String, List<CustomerCommodityEntity>>> entries = groupByItemId.entrySet();
         for (Map.Entry<String, List<CustomerCommodityEntity>> item: entries) {
             List<CustomerCommodityEntity> value = item.getValue();
-            String noticeStr = getNoticeStr(item.getKey(), value.get(0));
+            String noticeStr = ticketServicePlus.getNoticeStr(item.getKey(), value.get(0));
             if (!StringUtils.isEmpty(noticeStr)) {
 
                 List<CustomerCommodityEntity> itemValue = item.getValue();
@@ -72,51 +73,10 @@ public class NotifyScheduler {
         }
     }
 
-    /**
-     * 1.判断是否发送通知
-     * 2.构造通知消息
-     * @param itemId
-     * @param config
-     * @return
-     */
-    private String getNoticeStr(String itemId, CustomerCommodityEntity config) {
-        TradeDto tradeDto = ticketServiceImpl.getTradeDto(itemId);
-        DynStoreDto dynStoreDto = ticketServiceImpl.getDynStoreDto(itemId);
-
-        TradeDto.DefaultModelBean defaultModel = tradeDto.getDefaultModel();
-        TradeDto.DefaultModelBean.TradeResultBean tradeResult = defaultModel.getTradeResult();
-        Boolean cartEnable = tradeResult.getCartEnable();
-        Boolean tradeEnable = tradeResult.getTradeEnable();
-
-        DynStoreDto.DataBeanX data = dynStoreDto.getData();
-        DynStoreDto.DataBeanX.DynStockBean dynStock = data.getDynStock();
-        String price = data.getPrice();
-        Integer sellableQuantity = dynStock.getSellableQuantity();
-        Integer holdQuantity = dynStock.getHoldQuantity();
-
-        String itemName = config.getItemName();
-        Integer shelfed = config.getShelfed();
-        log.info("{}信息, itemId:{}, cartEnable:{}, tradeEnable:{}, price: {}, sellableQuantity: {}, holdQuantity: {}", itemName, itemId, cartEnable, tradeEnable, price, sellableQuantity, holdQuantity);
-
-        if (tradeEnable) {
-
-            if (ShelfEnum.UN_SHELF.getCode().equals(shelfed)) {
-                customerCommodityService.updateNotify(itemId, ShelfEnum.SHELF.getCode());
-                return String.format("您好, 商品上架通知, 商品ID为：%s, 商品名称: %s, 价格：%s, 当前总可售数量：%s, 淘宝后台总保留数量: %s", itemId, itemName, price, sellableQuantity, holdQuantity);
-            }
-
-        } else {
-            customerCommodityService.updateNotify(itemId, ShelfEnum.UN_SHELF.getCode());
-        }
-        return null;
-    }
 
     @PreDestroy
     public void closeNotice() {
-
         mailService.sendSimpleMail(MailConstant.myNoticeEmail, "服务器关闭");
-
     }
-
 
 }
